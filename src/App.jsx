@@ -464,7 +464,13 @@ export default function App() {
             marginBottom: 20,
           }}
         >
-          <SchedulePanel />
+          <SchedulePanel
+            onOpenSim={(simId) => {
+              const match = SIM_REGISTRY.find((s) => s.id === simId);
+              if (match) setActiveSim(match.id);
+              setActiveTab("sims");
+            }}
+          />
         </div>
       )}
 
