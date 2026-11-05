@@ -1,0 +1,195 @@
+/* Fonts loaded via <link> in index.html for faster non-blocking load */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #040b16;
+  --text: #f8f9fa;
+  --card: rgba(20, 34, 64, 0.6);
+  --card-alt: rgba(26, 45, 74, 0.7);
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --accent: #4cc9f0;
+  --accent-dark: #4361ee;
+  --orange: #ff6b35;
+  --gold: #f8961e;
+  --white: #f8f9fa;
+  --gray: #94a3b8;
+  --dim-text: #475569;
+  --green: #4dffb8;
+  --red: #ff4d6d;
+  --purple: #7209b7;
+  --pink: #f72585;
+  --lime: #b5e48c;
+  --cyan: #4cc9f0;
+  --sim-bg-from: rgba(76, 201, 240, 0.08);
+  --sim-bg-to: rgba(20, 34, 64, 0.85);
+  --accent-rgb: 76, 201, 240;
+  --scroll-thumb: rgba(100, 116, 139, 0.27);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f8faff;
+  --text: #0f172a;
+  --card: rgba(255, 255, 255, 0.72);
+  --card-alt: rgba(245, 248, 255, 0.78);
+  --glass: rgba(15, 23, 42, 0.08);
+  --glass-border: rgba(15, 23, 42, 0.12);
+  --accent: #2563eb;
+  --accent-dark: #1d4ed8;
+  --orange: #ea580c;
+  --gold: #c27803;
+  --white: #0f172a;
+  --gray: #475569;
+  --dim-text: #64748b;
+  --green: #047857;
+  --red: #991b1b;
+  --purple: #5b21b6;
+  --pink: #be185d;
+  --lime: #16a34a;
+  --cyan: #0ea5e9;
+  --sim-bg-from: rgba(37, 99, 235, 0.08);
+  --sim-bg-to: rgba(248, 250, 255, 0.95);
+  --accent-rgb: 37, 99, 235;
+  --scroll-thumb: rgba(100, 116, 139, 0.35);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Outfit", sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior-y: contain;
+}
+
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+/* ── Range inputs ─────────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(100, 116, 139, 0.13);
+  border-radius: 3px;
+  outline: none;
+  height: 6px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  background: currentColor;
+  border: none;
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* ── Scrollbars ───────────────────────────────── */
+::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.27);
+  border-radius: 2px;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Responsive font scaling ──────────────────── */
+@media (max-width: 400px) {
+  body {
+    font-size: 14px;
+  }
+}
+
+/* ── Landscape orientation optimization ───────── */
+@media (orientation: landscape) and (max-height: 500px) {
+  body {
+    font-size: 13px;
+  }
+}
+
+/* ── Focus visible ring ───────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── Reduce motion ────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Skeleton pulse animation ─────────────────── */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ── Radar Emitter animation ──────────────────── */
+@keyframes radarPulse {
+  0% {
+    box-shadow: inset 0 0 0px rgba(var(--accent-rgb), 0);
+  }
+  50% {
+    box-shadow: inset 0 0 30px rgba(var(--accent-rgb), 0.15);
+  }
+  100% {
+    box-shadow: inset 0 0 0px rgba(var(--accent-rgb), 0);
+  }
+}
