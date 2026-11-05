@@ -188,7 +188,7 @@ EXPLANATION INQUIRY:
       </DataRow>
 
       <InfoBox color={propellantData.color}>
-        <strong style={{ color: propellantData.color }}>Why Not Just Use Compressed Gas in Rockets?</strong> $1\,\text{liter}$ of liquid oxygen expands into $860\,\text{liters}$ of breathable gas! To hold that much gas at room temperature would require thick, heavy steel scuba tanks that weigh over $100\times$ more than the propellant itself. A rocket built with steel gas tanks would be too heavy to ever leave the ground!
+        <strong style={{ color: propellantData.color }}>Why Not Just Use Compressed Gas in Rockets?</strong> 1 liter of liquid oxygen expands into 860 liters of gas! To hold that much gas at room temperature would require thick, heavy steel tanks weighing over 100 times more than the propellant itself. A rocket built with ambient pressure or steel tanks would be far too heavy to ever reach orbit!
       </InfoBox>
 
       <AIInsight buildPrompt={buildPrompt} color={propellantData.color} />

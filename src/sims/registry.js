@@ -1,32 +1,42 @@
 // ═══════════════════════════════════════
-// IGCCST 2026 SIMULATION REGISTRY
+// IGCCST 2026 SIMULATION REGISTRY (20 SIMULATIONS)
 // Indo-German Conference on Cryogenics for Sustainable Technologies
 // ═══════════════════════════════════════
 
 import { T } from "../utils";
 
-// Core Engineering Sims
-import LindeHampsonSim from "./LindeHampsonSim";
-import CryocoolerSim from "./CryocoolerSim";
-import HydrogenStorageSim from "./HydrogenStorageSim";
-import LNGSupplyChainSim from "./LNGSupplyChainSim";
-import SuperconductorSim from "./SuperconductorSim";
-import HeatExchangerSim from "./HeatExchangerSim";
-import DewarInsulationSim from "./DewarInsulationSim";
-import ClaudeCollinsSim from "./ClaudeCollinsSim";
-import TransferLineSim from "./TransferLineSim";
-import DilutionFridgeSim from "./DilutionFridgeSim";
-
-// Layman & Fundamentals Sims (Cryo 101)
+// Cryo 101 & Fundamentals
 import AbsoluteZeroSim from "./AbsoluteZeroSim";
 import LeidenfrostSim from "./LeidenfrostSim";
 import RocketExpansionSim from "./RocketExpansionSim";
-import SuperfluidFountainSim from "./SuperfluidFountainSim";
 import ThermosFlaskSim from "./ThermosFlaskSim";
+import SuperfluidFountainSim from "./SuperfluidFountainSim";
 import CryoFreezingSim from "./CryoFreezingSim";
+import CryoTEMSim from "./CryoTEMSim";
+
+// Cryogenic Systems & Cycles
+import LindeHampsonSim from "./LindeHampsonSim";
+import CryocoolerSim from "./CryocoolerSim";
+import ClaudeCollinsSim from "./ClaudeCollinsSim";
+import HeatExchangerSim from "./HeatExchangerSim";
+import AirSeparationSim from "./AirSeparationSim";
+import RegenerativeCoolingSim from "./RegenerativeCoolingSim";
+
+// Storage & Infrastructure
+import DewarInsulationSim from "./DewarInsulationSim";
+import TransferLineSim from "./TransferLineSim";
+import SuperconductingCableSim from "./SuperconductingCableSim";
+
+// Hydrogen & Clean Energy
+import HydrogenStorageSim from "./HydrogenStorageSim";
+import LNGSupplyChainSim from "./LNGSupplyChainSim";
+
+// Quantum & Superconductivity
+import SuperconductorSim from "./SuperconductorSim";
+import DilutionFridgeSim from "./DilutionFridgeSim";
 
 export const CATEGORIES = [
-  { id: "all", label: "All (16)", color: T.accent },
+  { id: "all", label: "All (20)", color: T.accent },
   { id: "basics", label: "Cryo 101 (Basics)", color: T.green },
   { id: "systems", label: "Cooling & Liquefaction", color: T.cyan },
   { id: "infrastructure", label: "Storage & Distribution", color: T.orange },
@@ -64,7 +74,7 @@ export const SIM_REGISTRY = [
     color: T.pink,
     comp: RocketExpansionSim,
     tags: ["rocket propellant", "density", "expansion ratio", "860x", "ISRO CE-20", "deadweight"],
-    related: ["hydrogen_storage", "lng_supply_chain", "absolute_zero"],
+    related: ["regenerative_cooling", "hydrogen_storage", "lng_supply_chain"],
   },
   {
     id: "thermos_flask",
@@ -94,7 +104,17 @@ export const SIM_REGISTRY = [
     color: T.gold,
     comp: CryoFreezingSim,
     tags: ["ice crystals", "cellular damage", "vitrification", "food preservation", "stem cells"],
-    related: ["absolute_zero", "leidenfrost", "thermos_flask"],
+    related: ["cryo_tem", "absolute_zero", "leidenfrost"],
+  },
+  {
+    id: "cryo_tem",
+    icon: "🔬",
+    label: "Cryo-EM Vitrification",
+    cat: "basics",
+    color: T.pink,
+    comp: CryoTEMSim,
+    tags: ["Nobel Prize", "liquid ethane", "amorphous ice", "structural biology", "atomic resolution"],
+    related: ["cryo_freezing", "absolute_zero", "leidenfrost"],
   },
 
   // ─── CRYOGENIC SYSTEMS & LIQUEFACTION ───
@@ -106,7 +126,27 @@ export const SIM_REGISTRY = [
     color: T.cyan,
     comp: LindeHampsonSim,
     tags: ["Joule-Thomson", "liquefaction", "nitrogen", "gas separation", "inversion curve"],
-    related: ["claude_collins", "heat_exchanger", "dewar_insulation"],
+    related: ["claude_collins", "air_separation", "heat_exchanger"],
+  },
+  {
+    id: "air_separation",
+    icon: "🏭",
+    label: "Air Separation (ASU)",
+    cat: "systems",
+    color: T.accent,
+    comp: AirSeparationSim,
+    tags: ["distillation column", "pure oxygen", "nitrogen", "argon", "double column"],
+    related: ["linde_hampson", "heat_exchanger", "lng_supply_chain"],
+  },
+  {
+    id: "regenerative_cooling",
+    icon: "🔥",
+    label: "Rocket Reg. Cooling",
+    cat: "systems",
+    color: T.orange,
+    comp: RegenerativeCoolingSim,
+    tags: ["ISRO CE-20", "3500C flame", "nozzle channels", "supercritical", "heat flux 50MW"],
+    related: ["rocket_expansion", "heat_exchanger", "hydrogen_storage"],
   },
   {
     id: "cryocooler",
@@ -136,7 +176,7 @@ export const SIM_REGISTRY = [
     color: T.accent,
     comp: HeatExchangerSim,
     tags: ["plate-fin", "counter-flow", "NTU", "pinch point", "exergy efficiency"],
-    related: ["linde_hampson", "claude_collins", "transfer_line"],
+    related: ["air_separation", "linde_hampson", "transfer_line"],
   },
 
   // ─── STORAGE & INFRASTRUCTURE ───
@@ -158,7 +198,17 @@ export const SIM_REGISTRY = [
     color: T.cyan,
     comp: TransferLineSim,
     tags: ["vacuum jacketed pipe", "thermal contraction", "bellows", "geysering", "chill-down"],
-    related: ["dewar_insulation", "lng_supply_chain", "heat_exchanger"],
+    related: ["superconducting_cable", "dewar_insulation", "heat_exchanger"],
+  },
+  {
+    id: "superconducting_cable",
+    icon: "🔌",
+    label: "Superconducting Grid",
+    cat: "infrastructure",
+    color: T.green,
+    comp: SuperconductingCableSim,
+    tags: ["HTS power cable", "zero resistance", "300MW in 15cm", "LN2 cooled", "AmpaCity"],
+    related: ["superconductor", "transfer_line", "dewar_insulation"],
   },
 
   // ─── HYDROGEN & CLEAN ENERGY ───
@@ -180,7 +230,7 @@ export const SIM_REGISTRY = [
     color: T.green,
     comp: LNGSupplyChainSim,
     tags: ["LNG terminal", "cold energy recovery", "ORV", "exergy ORC", "methane"],
-    related: ["hydrogen_storage", "heat_exchanger", "transfer_line"],
+    related: ["hydrogen_storage", "air_separation", "heat_exchanger"],
   },
 
   // ─── QUANTUM & SUPERCONDUCTIVITY ───
@@ -192,7 +242,7 @@ export const SIM_REGISTRY = [
     color: T.accent,
     comp: SuperconductorSim,
     tags: ["Meissner effect", "flux pinning", "YBCO", "HTS", "critical field", "MagLev"],
-    related: ["cryocooler", "dilution_fridge", "claude_collins"],
+    related: ["superconducting_cable", "dilution_fridge", "claude_collins"],
   },
   {
     id: "dilution_fridge",

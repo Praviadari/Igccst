@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Suspense } from "react";
-import { THEMES, FONT, TECH_FONT } from "./utils";
+import { THEMES, FONT, TECH_FONT, MONO_FONT } from "./utils";
 import { SIM_REGISTRY, CATEGORIES } from "./sims";
 import { Pill, ErrorBoundary, RelatedSims, SchedulePanel, CryoDatabasePanel } from "./components";
 import "./styles/global.css";
@@ -36,12 +36,32 @@ function SimSkeleton({ color }) {
 }
 
 export default function App() {
-  const [activeSim, setActiveSim] = useState("linde_hampson");
+  const [activeSim, setActiveSim] = useState(() => {
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash;
+      const match = hash.match(/sim=([a-z0-9_]+)/);
+      if (match && SIM_REGISTRY.some((s) => s.id === match[1])) {
+        return match[1];
+      }
+    }
+    return "absolute_zero"; // Start with the fun, intuitive basics!
+  });
+
   const [catFilter, setCatFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("sims"); // "sims" | "database" | "schedule"
   const [kioskMode, setKioskMode] = useState(false);
   const [autoSimIndex, setAutoSimIndex] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
+  const [favorites, setFavorites] = useState(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      return JSON.parse(window.localStorage.getItem("igccst_favs") || "[]");
+    } catch {
+      return [];
+    }
+  });
+
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "dark";
     const saved = window.localStorage.getItem("theme");
@@ -52,10 +72,12 @@ export default function App() {
   const currentTheme = THEMES[theme];
   const [compareMode, setCompareMode] = useState(false);
 
-  const catCounts = SIM_REGISTRY.reduce((acc, s) => {
-    acc[s.cat] = (acc[s.cat] || 0) + 1;
-    return acc;
-  }, {});
+  // Sync hash to URL
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.location.hash = `sim=${activeSim}&tab=${activeTab}`;
+    }
+  }, [activeSim, activeTab]);
 
   useEffect(() => {
     document.body.dataset.theme = theme;
@@ -63,9 +85,21 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
+    try {
+      window.localStorage.setItem("igccst_favs", JSON.stringify(favorites));
+    } catch {}
+  }, [favorites]);
+
+  useEffect(() => {
     setCompareMode(false);
   }, [activeSim]);
 
+  // Toggle favorite
+  const toggleFavorite = (id) => {
+    setFavorites((prev) => (prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]));
+  };
+
+  // Kiosk Auto-Cycle
   useEffect(() => {
     if (!kioskMode) return;
     const allSims = SIM_REGISTRY.map((s) => s.id);
@@ -76,40 +110,18 @@ export default function App() {
         setActiveTab("sims");
         return next;
       });
-    }, 15000);
+    }, 14000);
     return () => clearInterval(interval);
   }, [kioskMode]);
 
   useEffect(() => {
     if (!kioskMode) return;
-    const pause = () => {
-      setKioskMode(false);
-    };
+    const pause = () => setKioskMode(false);
     window.addEventListener("touchstart", pause, { once: true });
     window.addEventListener("click", pause, { once: true });
     return () => {
       window.removeEventListener("touchstart", pause);
       window.removeEventListener("click", pause);
-    };
-  }, [kioskMode]);
-
-  useEffect(() => {
-    if (kioskMode) return;
-    let timer = setTimeout(() => setKioskMode(true), 90000);
-    const reset = () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => setKioskMode(true), 90000);
-    };
-    window.addEventListener("touchstart", reset);
-    window.addEventListener("mousemove", reset);
-    window.addEventListener("click", reset);
-    window.addEventListener("keydown", reset);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("touchstart", reset);
-      window.removeEventListener("mousemove", reset);
-      window.removeEventListener("click", reset);
-      window.removeEventListener("keydown", reset);
     };
   }, [kioskMode]);
 
@@ -122,40 +134,51 @@ export default function App() {
     sessionStorage.setItem("igccst_splash_seen", "1");
   };
 
-  // Keyboard shortcut: D toggles database, S toggles schedule
+  // Keyboard navigation: Left/Right arrows cycle simulations, D toggles database, S toggles schedule
   useEffect(() => {
     const handler = (e) => {
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-      if (e.key === "d" || e.key === "D") setActiveTab((prev) => (prev === "database" ? "sims" : "database"));
-      if (e.key === "s" || e.key === "S") setActiveTab((prev) => (prev === "schedule" ? "sims" : "schedule"));
+      if (e.key === "ArrowRight") {
+        const idx = SIM_REGISTRY.findIndex((s) => s.id === activeSim);
+        if (idx < SIM_REGISTRY.length - 1) setActiveSim(SIM_REGISTRY[idx + 1].id);
+      } else if (e.key === "ArrowLeft") {
+        const idx = SIM_REGISTRY.findIndex((s) => s.id === activeSim);
+        if (idx > 0) setActiveSim(SIM_REGISTRY[idx - 1].id);
+      } else if (e.key === "d" || e.key === "D") {
+        setActiveTab((prev) => (prev === "database" ? "sims" : "database"));
+      } else if (e.key === "s" || e.key === "S") {
+        setActiveTab((prev) => (prev === "schedule" ? "sims" : "schedule"));
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [activeSim]);
 
   const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 
-  const filtered = catFilter === "all" ? SIM_REGISTRY : SIM_REGISTRY.filter((s) => s.cat === catFilter);
+  // Filtering: Category + Search + Favorites
+  const filtered = SIM_REGISTRY.filter((s) => {
+    if (catFilter === "favorites") {
+      if (!favorites.includes(s.id)) return false;
+    } else if (catFilter !== "all" && s.cat !== catFilter) {
+      return false;
+    }
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return s.label.toLowerCase().includes(q) || s.tags.some((t) => t.toLowerCase().includes(q));
+  });
 
-  const active = SIM_REGISTRY.find((s) => s.id === activeSim);
+  const activeIndex = SIM_REGISTRY.findIndex((s) => s.id === activeSim);
+  const active = SIM_REGISTRY[activeIndex] || SIM_REGISTRY[0];
   const ActiveComp = active?.comp;
 
-  // Swipe gestures
-  const [touchStart, setTouchStart] = useState(null);
-  const onTouchStart = (e) => setTouchStart(e.targetTouches[0].clientX);
-  const onTouchEnd = (e) => {
-    if (touchStart === null) return;
-    const touchEnd = e.changedTouches[0].clientX;
-    const dir = touchStart - touchEnd;
-    if (Math.abs(dir) > 50) {
-      const idx = filtered.findIndex((s) => s.id === activeSim);
-      if (dir > 0 && idx < filtered.length - 1) setActiveSim(filtered[idx + 1].id);
-      if (dir < 0 && idx > 0) setActiveSim(filtered[idx - 1].id);
-    }
-    setTouchStart(null);
+  const navigateSim = (delta) => {
+    const nextIdx = (activeIndex + delta + SIM_REGISTRY.length) % SIM_REGISTRY.length;
+    setActiveSim(SIM_REGISTRY[nextIdx].id);
+    document.getElementById("active-sim")?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Exhibition Mode (Fullscreen + Wake Lock)
+  // Fullscreen / Exhibition Mode
   const [exhibition, setExhibition] = useState(false);
   const wakeLockRef = useRef(null);
 
@@ -182,28 +205,26 @@ export default function App() {
 
   return (
     <div
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
       style={{
         minHeight: "100vh",
         background: `radial-gradient(circle at 50% 0%, ${appBgStart} 0%, ${currentTheme.bg} 100%)`,
         color: currentTheme.white,
         fontFamily: FONT,
         padding: "14px 10px 48px",
-        maxWidth: "100%",
+        maxWidth: 820,
         margin: "0 auto",
         position: "relative",
         overflowX: "hidden",
       }}
     >
-      {/* Decorative blobs */}
+      {/* Decorative ambient background glows */}
       <div
         style={{
           position: "fixed",
           top: "-10%",
           left: "-10%",
-          width: "40%",
-          height: "40%",
+          width: "45%",
+          height: "45%",
           background: `${currentTheme.accent}08`,
           filter: "blur(100px)",
           borderRadius: "50%",
@@ -216,9 +237,9 @@ export default function App() {
           position: "fixed",
           bottom: "10%",
           right: "-10%",
-          width: "30%",
-          height: "30%",
-          background: `${currentTheme.cyan}05`,
+          width: "35%",
+          height: "35%",
+          background: `${currentTheme.cyan}06`,
           filter: "blur(80px)",
           borderRadius: "50%",
           pointerEvents: "none",
@@ -227,8 +248,8 @@ export default function App() {
       />
 
       {/* Header */}
-      <header style={{ textAlign: "center", marginBottom: 18, paddingTop: 6, position: "relative", zIndex: 1 }}>
-        <div style={{ position: "absolute", top: 0, right: 0, display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+      <header style={{ textAlign: "center", marginBottom: 16, paddingTop: 4, position: "relative", zIndex: 1 }}>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end", marginBottom: 8 }}>
           <button
             type="button"
             onClick={toggleTheme}
@@ -245,8 +266,9 @@ export default function App() {
               letterSpacing: 1,
             }}
           >
-            {theme === "dark" ? "LIGHT" : "DARK"}
+            {theme === "dark" ? "☀️ LIGHT" : "🌙 DARK"}
           </button>
+
           <button
             onClick={() => setKioskMode((prev) => !prev)}
             style={{
@@ -263,6 +285,7 @@ export default function App() {
           >
             {kioskMode ? "🟢 KIOSK ON" : "📺 KIOSK"}
           </button>
+
           {ActiveComp && (
             <button
               type="button"
@@ -283,6 +306,7 @@ export default function App() {
               {compareMode ? "✕ SINGLE" : "⇄ COMPARE"}
             </button>
           )}
+
           <button
             type="button"
             onClick={toggleExhibition}
@@ -299,15 +323,16 @@ export default function App() {
               letterSpacing: 1,
             }}
           >
-            {exhibition ? "EXIT FULL" : "FULLSCREEN"}
+            {exhibition ? "EXIT FULL" : "⛶ FULLSCREEN"}
           </button>
         </div>
 
+        {/* Conference Branding */}
         <div
           style={{
-            fontSize: "clamp(8px, 2.4vw, 11px)",
+            fontSize: "clamp(8px, 2.3vw, 10px)",
             color: currentTheme.accent,
-            letterSpacing: 2.5,
+            letterSpacing: 2.2,
             fontWeight: 800,
             textTransform: "uppercase",
             textShadow: `0 0 10px ${currentTheme.accent}30`,
@@ -318,7 +343,7 @@ export default function App() {
 
         <div
           style={{
-            fontSize: "clamp(18px, 5vw, 28px)",
+            fontSize: "clamp(19px, 5.2vw, 30px)",
             fontWeight: 900,
             color: "transparent",
             fontFamily: TECH_FONT,
@@ -349,7 +374,7 @@ export default function App() {
             fontSize: "clamp(8px, 2vw, 10px)",
             color: currentTheme.dimText,
             marginTop: 6,
-            fontWeight: 500,
+            fontWeight: 600,
             letterSpacing: 0.5,
           }}
         >
@@ -357,7 +382,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Tab bar */}
+      {/* Main Navigation Tabs */}
       <div
         style={{
           display: "flex",
@@ -369,7 +394,7 @@ export default function App() {
         }}
       >
         {[
-          { id: "sims", label: "⚡ SIMULATIONS" },
+          { id: "sims", label: `⚡ SIMULATIONS (${SIM_REGISTRY.length})` },
           { id: "database", label: "📚 CRYO DATABASE" },
           { id: "schedule", label: "📅 LIVE SCHEDULE" },
         ].map((tab) => (
@@ -387,7 +412,7 @@ export default function App() {
               fontFamily: TECH_FONT,
               fontSize: 10,
               fontWeight: 700,
-              letterSpacing: 1.5,
+              letterSpacing: 1.2,
               cursor: "pointer",
               transition: "color 0.2s, border-bottom-color 0.2s",
             }}
@@ -446,7 +471,31 @@ export default function App() {
       {/* Simulations Tab Content */}
       {activeTab === "sims" && (
         <>
-          {/* Category filter */}
+          {/* Search bar & Live Filter */}
+          <div style={{ marginBottom: 12, position: "relative", zIndex: 1 }}>
+            <input
+              type="text"
+              placeholder="🔍 Search simulations, keywords (e.g. hydrogen, rocket, qubit, leak)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px 14px",
+                borderRadius: 12,
+                background: currentTheme.glass,
+                border: `1px solid ${currentTheme.glassBorder}`,
+                color: currentTheme.white,
+                fontSize: 11,
+                fontFamily: FONT,
+                outline: "none",
+                transition: "border-color 0.2s",
+              }}
+              onFocus={(e) => (e.target.style.borderColor = currentTheme.accent)}
+              onBlur={(e) => (e.target.style.borderColor = currentTheme.glassBorder)}
+            />
+          </div>
+
+          {/* Category Filter Pills */}
           <nav
             aria-label="Filter simulations by track"
             className="no-scrollbar"
@@ -465,9 +514,14 @@ export default function App() {
                 {c.label}
               </Pill>
             ))}
+            {favorites.length > 0 && (
+              <Pill active={catFilter === "favorites"} onClick={() => setCatFilter("favorites")} color={T.gold}>
+                ⭐ Favorites ({favorites.length})
+              </Pill>
+            )}
           </nav>
 
-          {/* Sim grid */}
+          {/* Grid of Simulation Icons */}
           <div
             role="list"
             aria-label="Available cryogenic simulations"
@@ -486,7 +540,10 @@ export default function App() {
                 role="listitem"
                 aria-current={activeSim === s.id ? "true" : undefined}
                 key={s.id}
-                onClick={() => setActiveSim(s.id)}
+                onClick={() => {
+                  setActiveSim(s.id);
+                  document.getElementById("active-sim")?.scrollIntoView({ behavior: "smooth" });
+                }}
                 style={{
                   padding: "10px",
                   borderRadius: 14,
@@ -499,23 +556,27 @@ export default function App() {
                   fontSize: "clamp(9px, 2.5vw, 11px)",
                   fontWeight: 700,
                   cursor: "pointer",
-                  transition: "all .25s cubic-bezier(0.4, 0, 0.2, 1)",
+                  transition: "all .2s cubic-bezier(0.4, 0, 0.2, 1)",
                   textAlign: "center",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   gap: 4,
                   boxShadow: activeSim === s.id ? `0 6px 18px ${s.color}25` : "0 2px 8px rgba(0,0,0,0.15)",
-                  transform: activeSim === s.id ? "scale(1.03)" : "scale(1)",
+                  transform: activeSim === s.id ? "scale(1.02)" : "scale(1)",
                   minHeight: 64,
+                  position: "relative",
                 }}
               >
+                {favorites.includes(s.id) && (
+                  <span style={{ position: "absolute", top: 4, right: 6, fontSize: 8 }}>⭐</span>
+                )}
                 <div
                   style={{
                     fontSize: 22,
                     marginBottom: 2,
                     filter: activeSim === s.id ? `drop-shadow(0 0 8px ${s.color}60)` : "grayscale(0.4)",
-                    transition: "all .25s",
+                    transition: "all .2s",
                   }}
                 >
                   {s.icon}
@@ -525,29 +586,7 @@ export default function App() {
             ))}
           </div>
 
-          {/* Counts */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: 12,
-              flexWrap: "wrap",
-              padding: "6px 0",
-              marginBottom: 12,
-              borderTop: `1px solid ${currentTheme.glassBorder}`,
-            }}
-          >
-            <span style={{ fontSize: 9, color: currentTheme.accent, fontFamily: TECH_FONT, fontWeight: 700 }}>
-              {SIM_REGISTRY.length} CRYOGENIC SIMULATIONS
-            </span>
-            {Object.entries(catCounts).map(([cat, count]) => (
-              <span key={cat} style={{ fontSize: 8, color: currentTheme.dimText, fontFamily: TECH_FONT }}>
-                {cat.toUpperCase()}: {count}
-              </span>
-            ))}
-          </div>
-
-          {/* Active simulation panel */}
+          {/* Active Simulation Panel */}
           {ActiveComp && (
             <div
               id="active-sim"
@@ -556,38 +595,92 @@ export default function App() {
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
                 borderRadius: 18,
-                padding: "14px 10px",
-                border: `1px solid ${currentTheme.accent}20`,
-                boxShadow: `0 15px 30px rgba(0,0,0,0.3), inset 0 0 20px ${currentTheme.accent}05`,
+                padding: "16px 12px",
+                border: `1px solid ${currentTheme.accent}25`,
+                boxShadow: `0 15px 35px rgba(0,0,0,0.35), inset 0 0 20px ${currentTheme.accent}05`,
                 position: "relative",
                 zIndex: 1,
                 width: "100%",
               }}
             >
-              {/* Panel header */}
+              {/* Header with Navigation & Favorite Toggle */}
               <div
                 style={{
-                  fontSize: "clamp(13px, 3.5vw, 17px)",
-                  fontWeight: 900,
-                  color: currentTheme.white,
-                  fontFamily: TECH_FONT,
-                  marginBottom: 14,
                   display: "flex",
                   alignItems: "center",
-                  gap: 10,
-                  borderBottom: `1px solid ${active.color}20`,
+                  justifyContent: "space-between",
+                  borderBottom: `1px solid ${active.color}25`,
                   paddingBottom: 10,
+                  marginBottom: 14,
                 }}
               >
-                <span style={{ fontSize: 26, filter: `drop-shadow(0 0 10px ${active.color}80)` }}>{active.icon}</span>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <span style={{ fontSize: "clamp(8px, 2vw, 10px)", color: active.color, letterSpacing: 2, fontWeight: 800 }}>
-                    ACTIVE SIMULATION
-                  </span>
-                  {active.label}
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 28, filter: `drop-shadow(0 0 10px ${active.color}80)` }}>{active.icon}</span>
+                  <div>
+                    <div style={{ fontSize: 8, color: active.color, letterSpacing: 2, fontWeight: 800, fontFamily: TECH_FONT }}>
+                      SIMULATION {activeIndex + 1} OF {SIM_REGISTRY.length}
+                    </div>
+                    <div style={{ fontSize: "clamp(13px, 3.5vw, 17px)", fontWeight: 900, color: currentTheme.white, fontFamily: TECH_FONT }}>
+                      {active.label}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <button
+                    onClick={() => toggleFavorite(active.id)}
+                    style={{
+                      background: favorites.includes(active.id) ? `${T.gold}20` : currentTheme.glass,
+                      border: `1px solid ${favorites.includes(active.id) ? T.gold : currentTheme.glassBorder}`,
+                      color: favorites.includes(active.id) ? T.gold : currentTheme.gray,
+                      padding: "6px 10px",
+                      borderRadius: 8,
+                      fontSize: 10,
+                      cursor: "pointer",
+                    }}
+                    title="Bookmark this simulation"
+                  >
+                    {favorites.includes(active.id) ? "★ SAVED" : "☆ SAVE"}
+                  </button>
+
+                  <button
+                    onClick={() => navigateSim(-1)}
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 8,
+                      border: `1px solid ${currentTheme.glassBorder}`,
+                      background: currentTheme.glass,
+                      color: currentTheme.white,
+                      fontFamily: TECH_FONT,
+                      fontSize: 10,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                    title="Previous Simulation (Left Arrow)"
+                  >
+                    ◀
+                  </button>
+                  <button
+                    onClick={() => navigateSim(1)}
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 8,
+                      border: `1px solid ${currentTheme.glassBorder}`,
+                      background: currentTheme.glass,
+                      color: currentTheme.white,
+                      fontFamily: TECH_FONT,
+                      fontSize: 10,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                    title="Next Simulation (Right Arrow)"
+                  >
+                    ▶
+                  </button>
                 </div>
               </div>
 
+              {/* Simulation Component */}
               <ErrorBoundary color={active.color}>
                 <Suspense fallback={<SimSkeleton color={active.color} />}>
                   {compareMode ? (
@@ -625,6 +718,43 @@ export default function App() {
                 </Suspense>
               </ErrorBoundary>
 
+              {/* Bottom Quick Navigation & Related Sims */}
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16, paddingTop: 10, borderTop: `1px solid ${currentTheme.glassBorder}` }}>
+                <button
+                  onClick={() => navigateSim(-1)}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: 8,
+                    border: `1px solid ${currentTheme.glassBorder}`,
+                    background: currentTheme.glass,
+                    color: currentTheme.gray,
+                    fontFamily: TECH_FONT,
+                    fontSize: 9,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  ◀ PREV SIM
+                </button>
+
+                <button
+                  onClick={() => navigateSim(1)}
+                  style={{
+                    padding: "6px 12px",
+                    borderRadius: 8,
+                    border: `1px solid ${currentTheme.accent}40`,
+                    background: `${currentTheme.accent}15`,
+                    color: currentTheme.accent,
+                    fontFamily: TECH_FONT,
+                    fontSize: 9,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  NEXT SIM ▶
+                </button>
+              </div>
+
               {activeSim && (
                 <RelatedSims
                   currentId={activeSim}
@@ -637,7 +767,7 @@ export default function App() {
             </div>
           )}
 
-          {/* Topic tags */}
+          {/* Topic Tags */}
           {active && (
             <div
               style={{
@@ -670,7 +800,7 @@ export default function App() {
             </div>
           )}
 
-          {/* About IGCCST 2026 & Organizers */}
+          {/* About IGCCST 2026 */}
           <div
             style={{
               marginTop: 36,
@@ -709,10 +839,10 @@ export default function App() {
               }}
             >
               IGCCST 2026 convenes global experts from academia, research institutions, and industry to foster scientific
-              collaboration between India and Germany. Hosted at the historic <strong>IIT Kharagpur</strong> campus, the conference
-              features three primary thrust areas: <strong>Cryogenic Systems</strong> (gas liquefaction, cryocoolers),{" "}
-              <strong>Infrastructure</strong> (storage vessels, transfer lines, boil-off mitigation), and <strong>Clean Energy</strong>{" "}
-              (liquid hydrogen, LNG value chain), alongside pioneering tracks in quantum cooling and superconductivity.
+              collaboration between India and Germany. Hosted at the <strong>Cryogenic Engineering Centre, IIT Kharagpur</strong>,
+              the conference features cutting-edge tracks in <strong>Cryogenic Systems</strong> (liquefaction cycles, cryocoolers),{" "}
+              <strong>Infrastructure</strong> (storage vessels, transfer lines, vacuum insulations), <strong>Clean Energy</strong>{" "}
+              (liquid hydrogen, LNG regasification), and <strong>Quantum Technologies</strong> (superconductivity and dilution refrigeration).
             </p>
             <a
               href="https://igccst2026.com/"
@@ -732,7 +862,7 @@ export default function App() {
                 letterSpacing: 1,
               }}
             >
-              VISIT IGCCST2026.COM →
+              VISIT OFFICIAL CONFERENCE WEBSITE →
             </a>
           </div>
 
@@ -854,12 +984,11 @@ export default function App() {
                 color: currentTheme.gray,
                 lineHeight: 1.6,
                 marginBottom: 16,
-                fontFamily: currentTheme.font || "Outfit, sans-serif",
               }}
             >
               Welcome to the interactive simulation portal for the{" "}
               <strong>Indo-German Conference on Cryogenics for Sustainable Technologies</strong>. Explore real-time physics models
-              covering gas liquefaction, cryocoolers, liquid hydrogen storage, LNG regasification, and quantum cooling.
+              covering gas liquefaction, cryocoolers, liquid hydrogen storage, LNG regasification, quantum cooling, and everyday cryogenic phenomena.
               <br />
               <br />
               <strong style={{ color: currentTheme.accent }}>{SIM_REGISTRY.length} Interactive Simulations</strong> •
@@ -868,7 +997,7 @@ export default function App() {
             </div>
 
             <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap", marginBottom: 16 }}>
-              {["Liquefaction", "Cryocoolers", "Liquid H2", "LNG", "Superconductivity", "Quantum mK"].map((tag) => (
+              {["Cryo 101", "Liquefaction", "Liquid H2", "LNG", "Superconductivity", "Quantum mK"].map((tag) => (
                 <span
                   key={tag}
                   style={{

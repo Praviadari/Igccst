@@ -192,7 +192,7 @@ EXPLANATION INQUIRY:
       </DataRow>
 
       <InfoBox color={T.accent}>
-        <strong style={{ color: T.accent }}>Why Doesn't LN2 Burn Your Hand Instantly?</strong> Because human skin ($310\,\text{K}$) is over $230^\circ\text{C}$ hotter than liquid nitrogen ($77\,\text{K}$). The liquid touching your hand flashes into a micro-layer of gas within milliseconds. Because gas conducts heat $100\times$ slower than liquid, this vapor cushion acts as an invisible heat shield!
+        <strong style={{ color: T.accent }}>Why Doesn't LN2 Burn Your Hand Instantly?</strong> Because human skin (310 K) is over 230°C hotter than liquid nitrogen (77 K). The liquid touching your hand flashes into a micro-layer of gas within milliseconds. Because gas conducts heat 100 times slower than liquid, this vapor cushion acts as an invisible heat shield!
       </InfoBox>
 
       <AIInsight buildPrompt={buildPrompt} color={T.accent} />

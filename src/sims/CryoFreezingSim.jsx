@@ -204,7 +204,7 @@ INQUIRY TOPICS:
       </DataRow>
 
       <InfoBox color={T.accent}>
-        <strong style={{ color: T.accent }}>Why Does Slow Freezing Destroy Food & Cells?</strong> When food or living cells freeze slowly in a kitchen freezer, water molecules have minutes to assemble into giant, razor-sharp hexagonal ice crystals that puncture delicate cell membranes like daggers! In liquid nitrogen ($-196^\circ\text{C}$), the water flashes solid in seconds, forming sub-micron nano-crystals that leave cell walls completely intact.
+        <strong style={{ color: T.accent }}>Why Does Slow Freezing Destroy Food & Cells?</strong> When food or living cells freeze slowly in a kitchen freezer, water molecules have minutes to assemble into giant, razor-sharp hexagonal ice crystals that puncture delicate cell membranes like daggers! In liquid nitrogen (-196°C), the water flashes solid in seconds, forming sub-micron nano-crystals that leave cell walls completely intact.
       </InfoBox>
 
       <AIInsight buildPrompt={buildPrompt} color={T.accent} />

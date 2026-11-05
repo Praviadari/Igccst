@@ -32,6 +32,8 @@ export default function AbsoluteZeroSim() {
       ? "CRYOGENIC LIQUID 💧"
       : "GAS VAPOR 💨";
 
+  const speedNorm = Math.sqrt(tempK / 350); // Normalized speed factor
+
   const canvasRef = useCanvas(
     (ctx, W, H, frame) => {
       const canvasTheme = getCanvasTheme();
@@ -226,7 +228,7 @@ EXPLANATION REQUEST:
       </DataRow>
 
       <InfoBox color={T.cyan}>
-        <strong style={{ color: T.cyan }}>What is Temperature?</strong> Temperature is nothing more than the speed of jiggling atoms! At room temperature ($300\,\text{K}$), nitrogen molecules zoom at over $500\,\text{m/s}$ ($1,800\,\text{km/h}$). In liquid nitrogen ($77\,\text{K}$), they slow down by half. At **Absolute Zero** ($0\,\text{K} = -273.15^\circ\text{C}$), classical motion ceases completely.
+        <strong style={{ color: T.cyan }}>What is Temperature?</strong> Temperature is nothing more than the speed of jiggling atoms! At room temperature (300 K), nitrogen molecules zoom at over 500 m/s (1,800 km/h). In liquid nitrogen (77 K), they slow down by half. At <strong>Absolute Zero</strong> (0 K = -273.15°C), classical motion ceases completely.
       </InfoBox>
 
       <AIInsight buildPrompt={buildPrompt} color={T.cyan} />

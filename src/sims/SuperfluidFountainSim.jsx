@@ -206,7 +206,7 @@ EXPLANATION INQUIRY:
       </DataRow>
 
       <InfoBox color={T.green}>
-        <strong style={{ color: T.green }}>The Superfluid Fountain Effect:</strong> Below $2.17\,\text{K}$, Helium-4 transitions into a quantum superfluid (Helium II) with **zero viscosity**. When heat is applied inside a porous tube, superfluid helium rushes through the pores toward the warmth with zero friction, building osmotic pressure that shoots a fountain out of the nozzle! Above $2.17\,\text{K}$, the fountain stops instantly.
+        <strong style={{ color: T.green }}>The Superfluid Fountain Effect:</strong> Below 2.17 K, Helium-4 transitions into a quantum superfluid (Helium II) with <strong>zero viscosity</strong>. When heat is applied inside a porous tube, superfluid helium rushes through the pores toward the warmth with zero friction, building thermomechanical osmotic pressure that shoots a fountain out of the nozzle! Above 2.17 K, the fountain stops instantly.
       </InfoBox>
 
       <AIInsight buildPrompt={buildPrompt} color={T.green} />
