@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════
-// IGCCST 2026 SIMULATION REGISTRY (20 SIMULATIONS)
+// IGCCST 2026 SIMULATION REGISTRY (26 SIMULATIONS)
 // Indo-German Conference on Cryogenics for Sustainable Technologies
 // ═══════════════════════════════════════
 
@@ -13,6 +13,7 @@ import ThermosFlaskSim from "./ThermosFlaskSim";
 import SuperfluidFountainSim from "./SuperfluidFountainSim";
 import CryoFreezingSim from "./CryoFreezingSim";
 import CryoTEMSim from "./CryoTEMSim";
+import DuctileBrittleSim from "./DuctileBrittleSim";
 
 // Cryogenic Systems & Cycles
 import LindeHampsonSim from "./LindeHampsonSim";
@@ -21,22 +22,27 @@ import ClaudeCollinsSim from "./ClaudeCollinsSim";
 import HeatExchangerSim from "./HeatExchangerSim";
 import AirSeparationSim from "./AirSeparationSim";
 import RegenerativeCoolingSim from "./RegenerativeCoolingSim";
+import JouleThomsonSim from "./JouleThomsonSim";
 
 // Storage & Infrastructure
 import DewarInsulationSim from "./DewarInsulationSim";
 import TransferLineSim from "./TransferLineSim";
 import SuperconductingCableSim from "./SuperconductingCableSim";
+import ThermalContractionSim from "./ThermalContractionSim";
+import HeliumRecoverySim from "./HeliumRecoverySim";
 
 // Hydrogen & Clean Energy
 import HydrogenStorageSim from "./HydrogenStorageSim";
 import LNGSupplyChainSim from "./LNGSupplyChainSim";
+import OrthoParaSim from "./OrthoParaSim";
 
 // Quantum & Superconductivity
 import SuperconductorSim from "./SuperconductorSim";
 import DilutionFridgeSim from "./DilutionFridgeSim";
+import MRIQuenchSim from "./MRIQuenchSim";
 
 export const CATEGORIES = [
-  { id: "all", label: "All (20)", color: T.accent },
+  { id: "all", label: "All (26)", color: T.accent },
   { id: "basics", label: "Cryo 101 (Basics)", color: T.green },
   { id: "systems", label: "Cooling & Liquefaction", color: T.cyan },
   { id: "infrastructure", label: "Storage & Distribution", color: T.orange },
@@ -65,6 +71,16 @@ export const SIM_REGISTRY = [
     comp: LeidenfrostSim,
     tags: ["gas cushion", "boiling curve", "why LN2 doesn't burn", "film boiling", "skittering"],
     related: ["absolute_zero", "thermos_flask", "cryo_freezing"],
+  },
+  {
+    id: "ductile_brittle",
+    icon: "🔨",
+    label: "Brittle Fracture & Shatter",
+    cat: "basics",
+    color: T.red,
+    comp: DuctileBrittleSim,
+    tags: ["Challenger O-ring", "Titanic steel", "DBTT", "Charpy test", "FCC vs BCC", "embrittlement"],
+    related: ["thermal_contraction", "absolute_zero", "dewar_insulation"],
   },
   {
     id: "rocket_expansion",
@@ -98,12 +114,12 @@ export const SIM_REGISTRY = [
   },
   {
     id: "cryo_freezing",
-    icon: "🍓",
-    label: "Flash vs Slow Freeze",
+    icon: "❄️",
+    label: "Flash Freezing vs Ice Daggers",
     cat: "basics",
-    color: T.gold,
+    color: T.cyan,
     comp: CryoFreezingSim,
-    tags: ["ice crystals", "cellular damage", "vitrification", "food preservation", "stem cells"],
+    tags: ["ice crystals", "cell membranes", "food preservation", "LN2 flash freeze", "vitrification"],
     related: ["cryo_tem", "absolute_zero", "leidenfrost"],
   },
   {
@@ -113,92 +129,122 @@ export const SIM_REGISTRY = [
     cat: "basics",
     color: T.pink,
     comp: CryoTEMSim,
-    tags: ["Nobel Prize", "liquid ethane", "amorphous ice", "structural biology", "atomic resolution"],
-    related: ["cryo_freezing", "absolute_zero", "leidenfrost"],
+    tags: ["cryo-electron microscopy", "Nobel prize", "vitreous amorphous ice", "liquid ethane plunge"],
+    related: ["cryo_freezing", "superfluid_fountain", "absolute_zero"],
   },
 
-  // ─── CRYOGENIC SYSTEMS & LIQUEFACTION ───
+  // ─── COOLING & LIQUEFACTION (SYSTEMS) ───
   {
     id: "linde_hampson",
-    icon: "❄️",
-    label: "Linde Liquefier",
+    icon: "🌀",
+    label: "Linde-Hampson Liquefier",
     cat: "systems",
     color: T.cyan,
     comp: LindeHampsonSim,
-    tags: ["Joule-Thomson", "liquefaction", "nitrogen", "gas separation", "inversion curve"],
-    related: ["claude_collins", "air_separation", "heat_exchanger"],
+    tags: ["Joule-Thomson", "counter-flow HX", "compressor", "liquefaction", "N2 cycle"],
+    related: ["claude_collins", "heat_exchanger", "cryocooler", "joule_thomson"],
+  },
+  {
+    id: "joule_thomson",
+    icon: "💨",
+    label: "Joule-Thomson Inversion",
+    cat: "systems",
+    color: T.cyan,
+    comp: JouleThomsonSim,
+    tags: ["throttling", "inversion curve", "van der Waals", "why H2 heats up", "isenthalpic"],
+    related: ["linde_hampson", "claude_collins", "heat_exchanger"],
   },
   {
     id: "air_separation",
     icon: "🏭",
-    label: "Air Separation (ASU)",
+    label: "Air Separation Unit (ASU)",
     cat: "systems",
     color: T.accent,
     comp: AirSeparationSim,
-    tags: ["distillation column", "pure oxygen", "nitrogen", "argon", "double column"],
+    tags: ["fractional distillation", "liquid oxygen", "nitrogen", "reflux ratio", "tray column"],
     related: ["linde_hampson", "heat_exchanger", "lng_supply_chain"],
   },
   {
     id: "regenerative_cooling",
     icon: "🔥",
-    label: "Rocket Reg. Cooling",
+    label: "Rocket Nozzle Cooling",
     cat: "systems",
     color: T.orange,
     comp: RegenerativeCoolingSim,
-    tags: ["ISRO CE-20", "3500C flame", "nozzle channels", "supercritical", "heat flux 50MW"],
-    related: ["rocket_expansion", "heat_exchanger", "hydrogen_storage"],
+    tags: ["rocket engine", "combustion chamber", "CE-20", "supercritical hydrogen", "Bartz flux"],
+    related: ["rocket_expansion", "hydrogen_storage", "heat_exchanger"],
   },
   {
     id: "cryocooler",
     icon: "🔄",
-    label: "Stirling Cryocooler",
+    label: "Stirling / Pulse Tube",
     cat: "systems",
     color: T.orange,
     comp: CryocoolerSim,
-    tags: ["Stirling cycle", "pulse tube", "regenerator", "space cryo", "IR sensors"],
+    tags: ["Stirling cycle", "regenerator matrix", "satellite cooling", "pulse tube", "COP"],
     related: ["linde_hampson", "claude_collins", "superconductor"],
   },
   {
     id: "claude_collins",
-    icon: "🌀",
-    label: "Collins He Liquefier",
+    icon: "⚙️",
+    label: "Claude-Collins Liquefier",
     cat: "systems",
-    color: T.gold,
+    color: T.green,
     comp: ClaudeCollinsSim,
-    tags: ["helium liquefaction", "turbo-expander", "4.2K", "isentropic expansion"],
-    related: ["linde_hampson", "cryocooler", "dilution_fridge"],
+    tags: ["expansion engine", "isentropic expansion", "Helium liquefaction", "turboexpander"],
+    related: ["linde_hampson", "cryocooler", "heat_exchanger", "joule_thomson"],
   },
   {
     id: "heat_exchanger",
-    icon: "📐",
-    label: "Cryogenic PFHX",
+    icon: "🔁",
+    label: "Plate-Fin Heat Exchanger",
     cat: "systems",
-    color: T.accent,
+    color: T.gold,
     comp: HeatExchangerSim,
-    tags: ["plate-fin", "counter-flow", "NTU", "pinch point", "exergy efficiency"],
-    related: ["air_separation", "linde_hampson", "transfer_line"],
+    tags: ["BAHX", "pinch point", "NTU-effectiveness", "corrugated fins", "counterflow"],
+    related: ["linde_hampson", "claude_collins", "air_separation"],
   },
 
   // ─── STORAGE & INFRASTRUCTURE ───
   {
     id: "dewar_insulation",
-    icon: "🧪",
-    label: "Dewar & Vacuum",
+    icon: "🛡️",
+    label: "Cryogenic Storage Dewar",
+    cat: "infrastructure",
+    color: T.cyan,
+    comp: DewarInsulationSim,
+    tags: ["MLI radiation shields", "high vacuum", "boil-off rate", "neck conduction", "storage"],
+    related: ["thermos_flask", "transfer_line", "hydrogen_storage"],
+  },
+  {
+    id: "thermal_contraction",
+    icon: "📏",
+    label: "Shrinkage & Bellows",
     cat: "infrastructure",
     color: T.gold,
-    comp: DewarInsulationSim,
-    tags: ["vacuum insulation", "MLI", "neck conduction", "hold time", "dewar"],
-    related: ["thermos_flask", "hydrogen_storage", "transfer_line"],
+    comp: ThermalContractionSim,
+    tags: ["thermal contraction", "expansion bellows", "Invar 36", "pipe rupture", "thermal stress"],
+    related: ["transfer_line", "ductile_brittle", "dewar_insulation"],
   },
   {
     id: "transfer_line",
-    icon: "📏",
-    label: "Cryo Transfer Line",
+    icon: "🚰",
+    label: "Vacuum Transfer Line",
     cat: "infrastructure",
-    color: T.cyan,
+    color: T.orange,
     comp: TransferLineSim,
     tags: ["vacuum jacketed pipe", "thermal contraction", "bellows", "geysering", "chill-down"],
-    related: ["superconducting_cable", "dewar_insulation", "heat_exchanger"],
+    related: ["thermal_contraction", "superconducting_cable", "dewar_insulation"],
+  },
+  {
+    id: "helium_recovery",
+    icon: "♻️",
+    label: "Helium Conservation Loop",
+    cat: "infrastructure",
+    color: T.green,
+    comp: HeliumRecoverySim,
+    tags: ["helium recovery", "non-renewable", "77K cold trap", "gas balloon", "sustainability"],
+    related: ["mri_quench", "dewar_insulation", "claude_collins"],
   },
   {
     id: "superconducting_cable",
@@ -220,7 +266,17 @@ export const SIM_REGISTRY = [
     color: T.pink,
     comp: HydrogenStorageSim,
     tags: ["liquid hydrogen", "20K", "boil-off", "MLI vacuum", "ortho-para"],
-    related: ["rocket_expansion", "dewar_insulation", "lng_supply_chain"],
+    related: ["ortho_para", "rocket_expansion", "dewar_insulation"],
+  },
+  {
+    id: "ortho_para",
+    icon: "⚛️",
+    label: "Ortho-to-Para H2 Flip",
+    cat: "energy",
+    color: T.pink,
+    comp: OrthoParaSim,
+    tags: ["quantum spin", "nuclear isomers", "703 kJ/kg heat", "Fe2O3 catalyst", "boil-off"],
+    related: ["hydrogen_storage", "rocket_expansion", "joule_thomson"],
   },
   {
     id: "lng_supply_chain",
@@ -242,11 +298,21 @@ export const SIM_REGISTRY = [
     color: T.accent,
     comp: SuperconductorSim,
     tags: ["Meissner effect", "flux pinning", "YBCO", "HTS", "critical field", "MagLev"],
-    related: ["superconducting_cable", "dilution_fridge", "claude_collins"],
+    related: ["mri_quench", "superconducting_cable", "dilution_fridge"],
+  },
+  {
+    id: "mri_quench",
+    icon: "🩻",
+    label: "MRI Magnet & Quench",
+    cat: "quantum",
+    color: T.purple,
+    comp: MRIQuenchSim,
+    tags: ["hospital MRI", "persistent mode", "zero wall power", "thermal quench", "helium plume"],
+    related: ["superconductor", "helium_recovery", "dilution_fridge"],
   },
   {
     id: "dilution_fridge",
-    icon: "⚛️",
+    icon: "❄️",
     label: "Dilution Fridge (mK)",
     cat: "quantum",
     color: T.purple,
