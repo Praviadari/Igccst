@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { T, useCanvas } from "../utils";
 import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn } from "../components";
 import { AIInsight } from "../components/AIInsight";
@@ -51,9 +51,25 @@ export default function DuctileBrittleSim() {
     return (matProps.cryoEnergy + fraction * (matProps.roomEnergy - matProps.cryoEnergy)).toFixed(0);
   }, [tempK, matProps]);
 
+  useEffect(() => {
+    if (!striking) return;
+    let rafId;
+    const step = () => {
+      setAnimTime((t) => {
+        if (t < 50) {
+          rafId = requestAnimationFrame(step);
+          return t + 1;
+        }
+        return t;
+      });
+    };
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, [striking]);
+
   const triggerImpact = () => {
-    setStriking(true);
     setAnimTime(0);
+    setStriking(true);
   };
 
   const draw = (ctx, width, height) => {
@@ -177,10 +193,6 @@ export default function DuctileBrittleSim() {
     ctx.textAlign = "left";
     ctx.fillText(`Temp: ${tempK} K (${(tempK - 273.15).toFixed(0)}°C)`, 15, 20);
     ctx.fillText(`Mode: ${isBrittle ? "BRITTLE (Low Toughness)" : "DUCTILE (High Toughness)"}`, 15, 34);
-
-    if (striking) {
-      setAnimTime((t) => (t < 50 ? t + 1 : t));
-    }
   };
 
   const canvasRef = useCanvas(draw, [material, tempK, striking, animTime, isBrittle]);

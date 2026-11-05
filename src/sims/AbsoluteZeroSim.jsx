@@ -61,7 +61,6 @@ export default function AbsoluteZeroSim() {
 
       // Temperature color theme for molecules:
       // High T = orange/red, Mid = cyan/blue, Low = purple/gold
-      const speedNorm = Math.sqrt(tempK / 350); // Normalized speed factor
 
       // Draw 24 animated molecules
       for (let i = 0; i < 24; i++) {

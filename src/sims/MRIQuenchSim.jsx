@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { T, useCanvas } from "../utils";
 import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn } from "../components";
 import { AIInsight } from "../components/AIInsight";
@@ -44,6 +44,22 @@ export default function MRIQuenchSim() {
   const boiloffFlowKgS = isQuenching && quenchProgress < 85
     ? (12 + (quenchProgress / 50) * 25).toFixed(0)
     : "0.0";
+
+  useEffect(() => {
+    if (!isQuenching) return;
+    let rafId;
+    const step = () => {
+      setQuenchProgress((p) => {
+        if (p < 100) {
+          rafId = requestAnimationFrame(step);
+          return Math.min(100, p + 0.8);
+        }
+        return 100;
+      });
+    };
+    rafId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafId);
+  }, [isQuenching]);
 
   const triggerQuench = () => {
     setIsQuenching(true);
@@ -156,8 +172,6 @@ export default function MRIQuenchSim() {
         width / 2,
         height - 10
       );
-
-      setQuenchProgress((p) => (p < 100 ? p + 0.8 : 100));
     } else {
       ctx.fillStyle = T.green;
       ctx.font = "bold 10px system-ui";
