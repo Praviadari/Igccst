@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Suspense } from "react";
-import { THEMES, FONT, TECH_FONT, MONO_FONT, sound } from "./utils";
+import { THEMES, T, FONT, TECH_FONT, MONO_FONT, sound } from "./utils";
 import { SIM_REGISTRY, CATEGORIES } from "./sims";
 import { Pill, ErrorBoundary, RelatedSims, SchedulePanel, CryoDatabasePanel } from "./components";
 import "./styles/global.css";
