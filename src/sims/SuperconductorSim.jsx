@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { T, TECH_FONT, MONO_FONT, useCanvas, getCanvasTheme } from "../utils";
-import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn } from "../components";
+import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn, ChallengeBox } from "../components";
 import { AIInsight } from "../components/AIInsight";
 
 export default function SuperconductorSim() {
@@ -175,6 +175,14 @@ EXPERT INQUIRY:
   return (
     <div>
       <SimCanvas canvasRef={canvasRef} width={280} height={200} maxWidth={280} />
+
+      <ChallengeBox
+        title="Meissner Levitation Challenge"
+        goal="Cool YBCO below 93 K to achieve zero electrical resistance and lock into quantum levitation!"
+        isCompleted={isSuperconducting && parseFloat(levitationGapMm) > 5}
+        hint="Keep temperature below Tc (93 K) and applied field below critical Bc2 (120 T)."
+        color={T.accent}
+      />
 
       <PillRow>
         <Pill active={material === "ybco"} onClick={() => setMaterial("ybco")} color={T.accent}>

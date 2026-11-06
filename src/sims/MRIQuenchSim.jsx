@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { T, useCanvas } from "../utils";
-import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn } from "../components";
+import { T, useCanvas, sound } from "../utils";
+import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn, ChallengeBox } from "../components";
 import { AIInsight } from "../components/AIInsight";
 
 export default function MRIQuenchSim() {
@@ -64,11 +64,14 @@ export default function MRIQuenchSim() {
   const triggerQuench = () => {
     setIsQuenching(true);
     setQuenchProgress(0);
+    sound.alert();
+    setTimeout(() => sound.whoosh(), 250);
   };
 
   const resetMRI = () => {
     setIsQuenching(false);
     setQuenchProgress(0);
+    sound.click();
   };
 
   const draw = (ctx, width, height) => {
@@ -200,6 +203,14 @@ TECHNICAL QUESTIONS:
   return (
     <div>
       <SimCanvas canvasRef={canvasRef} width={280} height={200} maxWidth={280} />
+
+      <ChallengeBox
+        title="Quench Emergency Challenge"
+        goal="Safely vent all liquid helium to collapse a 4.5 MJ stored magnetic field!"
+        isCompleted={isQuenching && quenchProgress >= 80}
+        hint="Select 3.0 Tesla and hit 'MANUAL EMERGENCY QUENCH' to trigger cryogenic boil-off."
+        color={T.purple}
+      />
 
       <PillRow>
         <Pill active={fieldStrength === "3t"} onClick={() => { setFieldStrength("3t"); resetMRI(); }} color={T.purple}>

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { T, TECH_FONT, MONO_FONT, useCanvas, getCanvasTheme } from "../utils";
-import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn } from "../components";
+import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn, ChallengeBox } from "../components";
 import { AIInsight } from "../components/AIInsight";
 
 export default function RegenerativeCoolingSim() {
@@ -197,6 +197,14 @@ TECHNICAL ANALYSIS:
   return (
     <div>
       <SimCanvas canvasRef={canvasRef} width={280} height={200} maxWidth={280} />
+
+      <ChallengeBox
+        title="High-Pressure Rocket Challenge"
+        goal="Run combustion chamber pressure ≥ 100 bar while keeping wall temperature SAFE (< 650°C)!"
+        isCompleted={chamberPressBar >= 100 && isWallSafe}
+        hint="Increase coolant flow rate to 25+ kg/s and thin the copper wall to pull out 50+ MW/m² heat flux."
+        color={T.orange}
+      />
 
       <PillRow>
         <Pill active={coolant === "lh2"} onClick={() => setCoolant("lh2")} color={T.pink}>

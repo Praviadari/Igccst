@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Suspense } from "react";
-import { THEMES, FONT, TECH_FONT, MONO_FONT } from "./utils";
+import { THEMES, FONT, TECH_FONT, MONO_FONT, sound } from "./utils";
 import { SIM_REGISTRY, CATEGORIES } from "./sims";
 import { Pill, ErrorBoundary, RelatedSims, SchedulePanel, CryoDatabasePanel } from "./components";
 import "./styles/global.css";
@@ -71,6 +71,13 @@ export default function App() {
 
   const currentTheme = THEMES[theme];
   const [compareMode, setCompareMode] = useState(false);
+  const [isMuted, setIsMuted] = useState(() => sound.isMuted());
+
+  const toggleSound = () => {
+    const nextMuted = sound.toggleMute();
+    setIsMuted(nextMuted);
+    if (!nextMuted) sound.click();
+  };
 
   // Sync hash to URL
   useEffect(() => {
@@ -267,6 +274,26 @@ export default function App() {
             }}
           >
             {theme === "dark" ? "☀️ LIGHT" : "🌙 DARK"}
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleSound}
+            style={{
+              background: isMuted ? currentTheme.glass : `${currentTheme.cyan}20`,
+              border: `1px solid ${isMuted ? currentTheme.glassBorder : currentTheme.cyan}`,
+              color: isMuted ? currentTheme.gray : currentTheme.cyan,
+              padding: "5px 10px",
+              borderRadius: 8,
+              fontFamily: TECH_FONT,
+              fontSize: 8,
+              fontWeight: 800,
+              cursor: "pointer",
+              letterSpacing: 1,
+            }}
+            title={isMuted ? "Unmute simulation audio" : "Mute simulation audio"}
+          >
+            {isMuted ? "🔇 SOUND" : "🔊 SOUND"}
           </button>
 
           <button

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { T, useCanvas } from "../utils";
-import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn } from "../components";
+import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn, ChallengeBox } from "../components";
 import { AIInsight } from "../components/AIInsight";
 
 export default function ThermalContractionSim() {
@@ -221,6 +221,14 @@ TECHNICAL QUESTIONS:
   return (
     <div>
       <SimCanvas canvasRef={canvasRef} width={280} height={190} maxWidth={280} />
+
+      <ChallengeBox
+        title="Pipe Survival Challenge"
+        goal="Chill a 30+ meter pipeline down to liquid nitrogen (77 K) without tearing flanges apart!"
+        isCompleted={pipeLengthM >= 30 && fluidTempK <= 77 && !isRuptured && jointType === "bellows"}
+        hint="Rigid pipes exceed yield stress (600 MPa) and rupture. Switch to 'Flexible Bellows' to absorb the shrinkage."
+        color={T.gold}
+      />
 
       <PillRow>
         <Pill active={jointType === "bellows"} onClick={() => setJointType("bellows")} color={T.green}>

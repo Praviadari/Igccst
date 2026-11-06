@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
 import { T, TECH_FONT, MONO_FONT, useCanvas, getCanvasTheme } from "../utils";
-import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn } from "../components";
+import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn, ChallengeBox, SimControls } from "../components";
 import { AIInsight } from "../components/AIInsight";
 
 export default function AbsoluteZeroSim() {
   const [tempK, setTempK] = useState(77); // Kelvin (0 to 350)
   const [gasType, setGasType] = useState("nitrogen"); // nitrogen, helium, hydrogen
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [simSpeed, setSimSpeed] = useState(1);
 
   const gasData = {
     nitrogen: { name: "Nitrogen (N2)", molarMass: 28, freezeK: 63, boilK: 77.4, color: T.accent },
@@ -62,6 +64,9 @@ export default function AbsoluteZeroSim() {
       // Temperature color theme for molecules:
       // High T = orange/red, Mid = cyan/blue, Low = purple/gold
 
+      // Effective animation progression
+      const effectiveFrame = isPlaying ? frame * simSpeed : 0;
+
       // Draw 24 animated molecules
       for (let i = 0; i < 24; i++) {
         // Base position using pseudo-random offset
@@ -69,8 +74,8 @@ export default function AbsoluteZeroSim() {
         const baseY = boxY + 15 + (Math.floor(i / 6) * (boxH - 30)) / 3;
 
         // Vibrational/Brownian displacement proportional to speed
-        const phaseX = frame * 0.15 * speedNorm + i * 2.3;
-        const phaseY = frame * 0.12 * speedNorm + i * 4.7;
+        const phaseX = effectiveFrame * 0.15 * speedNorm + i * 2.3;
+        const phaseY = effectiveFrame * 0.12 * speedNorm + i * 4.7;
 
         // If at or near 0K, motion stops (quantum zero-point vibration only)
         const jitterX = tempK === 0 ? 0 : Math.sin(phaseX) * (18 * speedNorm);
@@ -159,8 +164,8 @@ export default function AbsoluteZeroSim() {
       ctx.fillStyle = tempK === 0 ? T.purple : tempK < 78 ? T.cyan : T.orange;
       ctx.fillText(stateOfMatter, boxX + 6, boxY + boxH + 14);
     },
-    [tempK, gasType, gasData, speedNorm, stateOfMatter],
-    { animate: true }
+    [tempK, gasType, gasData, speedNorm, stateOfMatter, isPlaying, simSpeed],
+    { animate: isPlaying }
   );
 
   const buildPrompt = useCallback(
@@ -186,6 +191,23 @@ EXPLANATION REQUEST:
   return (
     <div>
       <SimCanvas canvasRef={canvasRef} width={280} height={200} maxWidth={280} />
+
+      <SimControls
+        isPlaying={isPlaying}
+        onTogglePlay={() => setIsPlaying((p) => !p)}
+        speed={simSpeed}
+        onToggleSpeed={() => setSimSpeed((s) => (s === 1 ? 0.3 : 1))}
+        onReset={() => { setTempK(77); setGasType("nitrogen"); setIsPlaying(true); setSimSpeed(1); }}
+        color={T.cyan}
+      />
+
+      <ChallengeBox
+        title="Phase Transition Challenge"
+        goal="Freeze Nitrogen into a solid crystal lattice (T ≤ 63 K) without stopping time!"
+        isCompleted={gasType === "nitrogen" && tempK <= 63 && tempK > 0}
+        hint="Select Nitrogen, then drag the temperature slider down below 63 Kelvin (-210°C)."
+        color={T.cyan}
+      />
 
       <PillRow>
         <Pill active={tempK === 295} onClick={() => setTempK(295)} color={T.orange}>

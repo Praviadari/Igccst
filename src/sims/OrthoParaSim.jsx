@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { T, useCanvas } from "../utils";
-import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn } from "../components";
+import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn, ChallengeBox } from "../components";
 import { AIInsight } from "../components/AIInsight";
 
 export default function OrthoParaSim() {
@@ -185,6 +185,14 @@ TECHNICAL QUESTIONS:
   return (
     <div>
       <SimCanvas canvasRef={canvasRef} width={280} height={190} maxWidth={280} />
+
+      <ChallengeBox
+        title="Hydrogen Stabilization Challenge"
+        goal="Store liquid hydrogen for ≥ 10 days with less than 5% self-boiloff loss!"
+        isCompleted={catalyst === "fe2o3" && daysStored >= 10 && parseFloat(boilOffPct) < 5}
+        hint="Raw liquid hydrogen boils off rapidly due to ortho->para heat release. Use the Fe2O3 catalyst!"
+        color={T.green}
+      />
 
       <PillRow>
         <Pill active={catalyst === "fe2o3"} onClick={() => setCatalyst("fe2o3")} color={T.green}>

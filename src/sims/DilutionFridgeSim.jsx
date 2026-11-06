@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { T, TECH_FONT, MONO_FONT, useCanvas, getCanvasTheme } from "../utils";
-import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn } from "../components";
+import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn, ChallengeBox } from "../components";
 import { AIInsight } from "../components/AIInsight";
 
 export default function DilutionFridgeSim() {
@@ -176,6 +176,14 @@ IN-DEPTH QUANTUM CRYOGENICS INQUIRY:
   return (
     <div>
       <SimCanvas canvasRef={canvasRef} width={280} height={200} maxWidth={280} />
+
+      <ChallengeBox
+        title="Sub-10 Millikelvin Quantum Challenge"
+        goal="Achieve an ultra-low base temperature below 10 mK to keep quantum qubits coherent!"
+        isCompleted={parseFloat(eqBaseMKT) < 10}
+        hint="Boost ³He circulation rate to 400+ μmol/s and lower applied heat load below 5 μW."
+        color={T.purple}
+      />
 
       <PillRow>
         <Pill active={precoolType === "dry"} onClick={() => setPrecoolType("dry")} color={T.accent}>

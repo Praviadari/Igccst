@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { T, useCanvas } from "../utils";
-import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn } from "../components";
+import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn, ChallengeBox, SimControls } from "../components";
 import { AIInsight } from "../components/AIInsight";
 
 export default function JouleThomsonSim() {
@@ -176,6 +176,14 @@ TECHNICAL QUESTIONS:
   return (
     <div>
       <SimCanvas canvasRef={canvasRef} width={280} height={190} maxWidth={280} />
+
+      <ChallengeBox
+        title="Inversion Threshold Challenge"
+        goal="Pre-cool Hydrogen (H₂) so that throttling causes COOLING instead of HEATING!"
+        isCompleted={gas === "h2" && isCooling}
+        hint="Hydrogen's maximum inversion temperature is 202 K (-71°C). Select H₂ and lower T₁ below 202 K."
+        color={T.pink}
+      />
 
       <PillRow>
         <Pill active={gas === "n2"} onClick={() => { setGas("n2"); setInletTempK(295); }} color={T.cyan}>

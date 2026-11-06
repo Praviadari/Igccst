@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { T, useCanvas } from "../utils";
-import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn } from "../components";
+import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn, ChallengeBox } from "../components";
 import { AIInsight } from "../components/AIInsight";
 
 export default function HeliumRecoverySim() {
@@ -195,6 +195,14 @@ TECHNICAL QUESTIONS:
   return (
     <div>
       <SimCanvas canvasRef={canvasRef} width={280} height={190} maxWidth={280} />
+
+      <ChallengeBox
+        title="Zero-Loss Helium Challenge"
+        goal="Switch to Closed-Loop recovery and recycle ≥ 20 Liters/day to save over $30,000 annually!"
+        isCompleted={mode === "closed_loop" && parseFloat(recoveredLitersDay) >= 20}
+        hint="Select 'Closed-Loop Recovery' and set lab boil-off to 25+ L/day with 95% efficiency."
+        color={T.green}
+      />
 
       <PillRow>
         <Pill active={mode === "closed_loop"} onClick={() => setMode("closed_loop")} color={T.green}>

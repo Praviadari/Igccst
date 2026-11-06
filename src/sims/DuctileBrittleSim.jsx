@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { T, useCanvas } from "../utils";
-import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn } from "../components";
+import { Pill, PillRow, Slider, DataBox, DataRow, InfoBox, SimCanvas, ExportBtn, ChallengeBox } from "../components";
 import { AIInsight } from "../components/AIInsight";
 
 export default function DuctileBrittleSim() {
@@ -215,6 +215,14 @@ TECHNICAL QUESTIONS:
   return (
     <div>
       <SimCanvas canvasRef={canvasRef} width={280} height={200} maxWidth={280} />
+
+      <ChallengeBox
+        title="Titanic Brittle Fracture Challenge"
+        goal="Shatter the carbon steel specimen into flying brittle shards below its 210 K DBTT!"
+        isCompleted={material === "carbon_steel" && isBrittle && striking && animTime > 15}
+        hint="Select Carbon Steel, lower temperature below 210 K (-63°C), and press 'Drop Pendulum Hammer'."
+        color={T.cyan}
+      />
 
       <PillRow>
         <Pill active={material === "rubber"} onClick={() => { setMaterial("rubber"); setStriking(false); }} color={T.orange}>

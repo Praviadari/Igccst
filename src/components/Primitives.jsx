@@ -1,13 +1,13 @@
 import { useRef, useEffect } from "react";
-import { T, TECH_FONT, MONO_FONT, haptics } from "../utils";
+import { T, TECH_FONT, MONO_FONT, haptics, sound } from "../utils";
 import { SIM_REGISTRY } from "../sims";
-
 
 export const Pill = ({ active, onClick, children, color = T.accent, label }) => (
   <button
     type="button"
     onClick={(e) => {
       haptics.light();
+      sound.click();
       onClick && onClick(e);
     }}
     aria-label={label ?? (typeof children === "string" ? children : undefined)}
@@ -88,6 +88,7 @@ export const Slider = ({ label, value, onChange, min, max, step = 1, unit = "", 
           aria-label={`${label}: ${value}${unit}`}
           onChange={(e) => {
             haptics.light();
+            sound.click();
             onChange(Number(e.target.value));
           }}
           style={{
@@ -438,3 +439,122 @@ export const RelatedSims = ({ currentId, onNavigate }) => {
     </div>
   );
 };
+
+export const ChallengeBox = ({ title = "Inquiry Challenge", goal, isCompleted, hint, color = T.gold }) => {
+  useEffect(() => {
+    if (isCompleted) {
+      sound.chime();
+      haptics.success();
+    }
+  }, [isCompleted]);
+
+  return (
+    <div
+      style={{
+        margin: "12px 0",
+        padding: "10px 12px",
+        borderRadius: 10,
+        background: isCompleted ? "rgba(16, 185, 129, 0.12)" : "rgba(245, 158, 11, 0.08)",
+        border: `1px solid ${isCompleted ? T.green : color}40`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 10,
+      }}
+    >
+      <div style={{ flex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+          <span style={{ fontSize: 13 }}>{isCompleted ? "🏆" : "🎯"}</span>
+          <span style={{ fontFamily: TECH_FONT, fontSize: 10, fontWeight: 800, color: isCompleted ? T.green : color, letterSpacing: 1 }}>
+            {title.toUpperCase()}
+          </span>
+        </div>
+        <div style={{ fontSize: 10, color: T.white, fontWeight: 500 }}>
+          {goal}
+        </div>
+        {hint && !isCompleted && (
+          <div style={{ fontSize: 8.5, color: T.gray, marginTop: 2 }}>
+            💡 Hint: {hint}
+          </div>
+        )}
+      </div>
+      <div>
+        <span
+          style={{
+            padding: "4px 8px",
+            borderRadius: 6,
+            background: isCompleted ? `${T.green}25` : `${color}15`,
+            color: isCompleted ? T.green : color,
+            border: `1px solid ${isCompleted ? T.green : color}50`,
+            fontFamily: TECH_FONT,
+            fontSize: 9,
+            fontWeight: 800,
+            letterSpacing: 0.5,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {isCompleted ? "✓ ACHIEVED" : "IN PROGRESS"}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export const SimControls = ({ isPlaying = true, onTogglePlay, speed = 1, onToggleSpeed, onReset, color = T.accent }) => (
+  <div style={{ display: "flex", gap: 6, justifyContent: "center", alignItems: "center", margin: "8px 0 12px", flexWrap: "wrap" }}>
+    {onTogglePlay && (
+      <button
+        onClick={() => { sound.click(); onTogglePlay(); }}
+        style={{
+          padding: "5px 12px",
+          borderRadius: 8,
+          border: `1px solid ${isPlaying ? color : T.red}40`,
+          background: isPlaying ? `${color}18` : `${T.red}18`,
+          color: isPlaying ? color : T.red,
+          fontSize: 9,
+          fontFamily: TECH_FONT,
+          fontWeight: 700,
+          cursor: "pointer",
+        }}
+      >
+        {isPlaying ? "⏸ PAUSE" : "▶ PLAY"}
+      </button>
+    )}
+    {onToggleSpeed && (
+      <button
+        onClick={() => { sound.click(); onToggleSpeed(); }}
+        style={{
+          padding: "5px 10px",
+          borderRadius: 8,
+          border: `1px solid ${T.glassBorder}`,
+          background: T.glass,
+          color: speed === 1 ? T.gray : T.cyan,
+          fontSize: 9,
+          fontFamily: TECH_FONT,
+          fontWeight: 700,
+          cursor: "pointer",
+        }}
+      >
+        ⏱ {speed}x SPEED
+      </button>
+    )}
+    {onReset && (
+      <button
+        onClick={() => { sound.click(); onReset(); }}
+        style={{
+          padding: "5px 10px",
+          borderRadius: 8,
+          border: `1px solid ${T.glassBorder}`,
+          background: T.glass,
+          color: T.gray,
+          fontSize: 9,
+          fontFamily: TECH_FONT,
+          fontWeight: 700,
+          cursor: "pointer",
+        }}
+      >
+        🔄 RESET
+      </button>
+    )}
+  </div>
+);
