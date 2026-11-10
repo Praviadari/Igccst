@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════
-// IGCCST 2026 SIMULATION REGISTRY (26 SIMULATIONS)
+// IGCCST 2026 SIMULATION REGISTRY (30 SIMULATIONS)
 // Indo-German Conference on Cryogenics for Sustainable Technologies
 // ═══════════════════════════════════════
 
@@ -41,12 +41,18 @@ import SuperconductorSim from "./SuperconductorSim";
 import DilutionFridgeSim from "./DilutionFridgeSim";
 import MRIQuenchSim from "./MRIQuenchSim";
 
+// Added 10-11-2026 from the IGCCST 2026 abstract booklet: topics with talks/posters but no sim
+import ADRSim from "./ADRSim";
+import MagnetocaloricH2Sim from "./MagnetocaloricH2Sim";
+import CryosorptionSim from "./CryosorptionSim";
+import CarbonCaptureSim from "./CarbonCaptureSim";
+
 export const CATEGORIES = [
-  { id: "all", label: "All (26)", color: T.accent },
+  { id: "all", label: "All", color: T.accent },
   { id: "basics", label: "Cryo 101 (Basics)", color: T.green },
   { id: "systems", label: "Cooling & Liquefaction", color: T.cyan },
   { id: "infrastructure", label: "Storage & Distribution", color: T.orange },
-  { id: "energy", label: "Hydrogen & LNG", color: T.gold },
+  { id: "energy", label: "Hydrogen, LNG & CO₂", color: T.gold },
   { id: "quantum", label: "Quantum & Superconductivity", color: T.purple },
 ];
 
@@ -286,7 +292,37 @@ export const SIM_REGISTRY = [
     color: T.green,
     comp: LNGSupplyChainSim,
     tags: ["LNG terminal", "cold energy recovery", "ORV", "exergy ORC", "methane"],
-    related: ["hydrogen_storage", "air_separation", "heat_exchanger"],
+    related: ["hydrogen_storage", "air_separation", "heat_exchanger", "carbon_capture"],
+  },
+  {
+    id: "magnetocaloric_h2",
+    icon: "🧲",
+    label: "Magnetic H2 Liquefier",
+    cat: "energy",
+    color: T.gold,
+    comp: MagnetocaloricH2Sim,
+    tags: ["magnetocaloric", "AMR", "active magnetic regenerator", "hydrogen liquefaction", "Laves phase", "HyLICAL"],
+    related: ["adr", "hydrogen_storage", "ortho_para", "claude_collins"],
+  },
+  {
+    id: "cryosorption",
+    icon: "🧽",
+    label: "Cryosorption H2 Storage",
+    cat: "energy",
+    color: T.green,
+    comp: CryosorptionSim,
+    tags: ["activated carbon", "physisorption", "MOF", "77 K", "Langmuir isotherm", "hydrogen tank"],
+    related: ["hydrogen_storage", "magnetocaloric_h2", "dewar_insulation"],
+  },
+  {
+    id: "carbon_capture",
+    icon: "🌫️",
+    label: "Cryogenic CO2 Capture",
+    cat: "energy",
+    color: T.cyan,
+    comp: CarbonCaptureSim,
+    tags: ["desublimation", "dry ice", "frost point", "flue gas", "carbon capture", "LNG cold energy"],
+    related: ["lng_supply_chain", "air_separation", "heat_exchanger"],
   },
 
   // ─── QUANTUM & SUPERCONDUCTIVITY ───
@@ -318,6 +354,19 @@ export const SIM_REGISTRY = [
     color: T.purple,
     comp: DilutionFridgeSim,
     tags: ["millikelvin", "He3-He4 dilution", "quantum computing", "qubit cooling", "mK"],
-    related: ["superfluid_fountain", "superconductor", "claude_collins"],
+    related: ["adr", "superfluid_fountain", "superconductor", "claude_collins"],
+  },
+  {
+    id: "adr",
+    icon: "🧊",
+    label: "ADR Magnetic Cooling",
+    cat: "quantum",
+    color: T.purple,
+    comp: ADRSim,
+    tags: ["adiabatic demagnetization", "salt pill", "FAA", "heat switch", "space cryogenics", "sub-kelvin", "magnetocaloric"],
+    related: ["dilution_fridge", "magnetocaloric_h2", "superconductor", "cryocooler"],
   },
 ];
+
+// Keep the 'All' chip count in step with the registry
+CATEGORIES[0].label = `All (${SIM_REGISTRY.length})`;

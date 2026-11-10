@@ -9,7 +9,15 @@ Conference website: [https://igccst2026.com](https://igccst2026.com)
 
 ## 🔬 Interactive Simulations
 
-The portal features 10 real-time physics simulations with interactive parameters, canvas animations, and AI-assisted scientific reasoning:
+The portal features 30 real-time physics simulations with interactive parameters, canvas animations, and AI-assisted scientific reasoning. A selection:
+
+### 0. Added from the IGCCST 2026 abstract booklet
+* **ADR (Adiabatic Demagnetization Refrigerator)**: Brillouin-model entropy of FAA / CPA / GGG salt pills, S–T cycle, heat-switch leak, floor temperature and hold time (talks SP18, SP24; OP04; posters PP01, PP04, PP24, PP26).
+* **Magnetocaloric H₂ Liquefier (AMR)**: regenerator layers vs field, ideal work, energy vs a conventional plant (SP11, PP14).
+* **Cryosorption H₂ Storage**: Langmuir isotherm on activated carbon / MOF-5, g/L vs empty tank, 700 bar and LH₂ (SP23).
+* **Cryogenic CO₂ Capture**: CO₂ frost line, capture vs cold-end temperature, LN₂ / LNG cold, energy per tonne (SP04, PP08, PP25, PP27).
+
+The **Live Schedule** tab carries the official programme, every abstract ID and all posters; each talk/poster links to its simulation and every simulation lists its talks/posters ("At IGCCST 2026"). Data: `src/data/conference.js`. Checks: `node scripts/check-models.mjs` and `node scripts/check-links.mjs`.
 
 ### 1. Cryogenic Systems (Cooling & Liquefaction)
 * **Linde-Hampson Gas Liquefaction Cycle**: Explore Joule-Thomson throttling, inversion temperature boundaries (N₂, H₂, He), and counter-flow heat exchanger effectiveness.

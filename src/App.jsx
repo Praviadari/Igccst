@@ -2,7 +2,11 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { THEMES, T, FONT, TECH_FONT, MONO_FONT, sound } from "./utils";
 import { SIM_REGISTRY, CATEGORIES } from "./sims";
 import { Pill, ErrorBoundary, RelatedSims, SchedulePanel, CryoDatabasePanel } from "./components";
+import { conferenceItemsForSim } from "./data/conference";
 import "./styles/global.css";
+
+// Label/icon/colour of every sim, handed to the schedule (it cannot import the registry: circular import)
+const SIM_META = Object.fromEntries(SIM_REGISTRY.map((s) => [s.id, { label: s.label, icon: s.icon, color: s.color }]));
 
 /* Skeleton loader for lazy-loaded simulations */
 function SimSkeleton({ color }) {
@@ -50,6 +54,21 @@ export default function App() {
   const [catFilter, setCatFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("sims"); // "sims" | "database" | "schedule"
+  const [scheduleFocus, setScheduleFocus] = useState(null); // talk/poster to highlight when jumping from a sim
+
+  // Open a sim from the schedule or database tab and bring it into view
+  const openSimFromTab = (simId) => {
+    const match = SIM_REGISTRY.find((s) => s.id === simId);
+    if (match) setActiveSim(match.id);
+    setActiveTab("sims");
+    setTimeout(() => document.getElementById("active-sim")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+  };
+
+  // Jump from a sim to its talk/poster in the programme
+  const showInSchedule = (item) => {
+    setScheduleFocus({ dayIdx: item.dayIdx, evIdx: item.evIdx, abs: item.abs, poster: item.type === "poster-item", nonce: Date.now() });
+    setActiveTab("schedule");
+  };
   const [kioskMode, setKioskMode] = useState(false);
   const [autoSimIndex, setAutoSimIndex] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
@@ -467,8 +486,7 @@ export default function App() {
         >
           <CryoDatabasePanel
             onOpenSim={(simId) => {
-              const match = SIM_REGISTRY.find((s) => s.id === simId);
-              if (match) setActiveSim(match.id);
+              openSimFromTab(simId);
               setActiveTab("sims");
             }}
           />
@@ -491,13 +509,7 @@ export default function App() {
             marginBottom: 20,
           }}
         >
-          <SchedulePanel
-            onOpenSim={(simId) => {
-              const match = SIM_REGISTRY.find((s) => s.id === simId);
-              if (match) setActiveSim(match.id);
-              setActiveTab("sims");
-            }}
-          />
+          <SchedulePanel onOpenSim={openSimFromTab} simMeta={SIM_META} focus={scheduleFocus} />
         </div>
       )}
 
@@ -787,6 +799,39 @@ export default function App() {
                   NEXT SIM ▶
                 </button>
               </div>
+
+              {/* At IGCCST 2026: talks and posters on this topic, each a jump into the schedule */}
+              {(() => {
+                const items = conferenceItemsForSim(activeSim);
+                if (!items.length) return null;
+                return (
+                  <div style={{ marginTop: 14, padding: "10px 12px", borderRadius: 12, border: `1px solid ${T.gold}40`, background: `${T.gold}0d` }}>
+                    <div style={{ fontFamily: TECH_FONT, fontSize: 9, fontWeight: 800, color: T.gold, letterSpacing: 1.5, marginBottom: 8 }}>
+                      📅 AT IGCCST 2026 — {items.length} {items.length === 1 ? "TALK / POSTER" : "TALKS & POSTERS"} ON THIS TOPIC
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                      {items.map((it, k) => (
+                        <button
+                          key={k}
+                          onClick={() => showInSchedule(it)}
+                          style={{
+                            textAlign: "left", padding: "7px 9px", borderRadius: 8, cursor: "pointer",
+                            border: `1px solid ${currentTheme.glassBorder}`, background: currentTheme.glass, color: currentTheme.white,
+                          }}
+                          title="Show in the conference schedule"
+                        >
+                          <div style={{ fontSize: 8, fontFamily: MONO_FONT, color: T.gold }}>
+                            {it.dayLabel} · {it.time} · {it.type === "poster-item" ? "POSTER" : it.type === "oral" ? "ORAL" : it.type === "industry" ? "INDUSTRY" : "INVITED"}
+                            {it.abs ? ` · ${it.abs}` : ""}
+                          </div>
+                          <div style={{ fontSize: 11, fontWeight: 700, marginTop: 1 }}>{it.title}</div>
+                          {it.speaker && <div style={{ fontSize: 9, color: currentTheme.gray }}>{it.speaker}</div>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {activeSim && (
                 <RelatedSims
